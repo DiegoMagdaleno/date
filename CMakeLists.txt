@@ -157,6 +157,14 @@ if( BUILD_TZ_LIB )
         target_link_libraries( date-tz PRIVATE ${CURL_LIBRARIES} )
     endif( )
 endif( )
+if ( BUILD_TZ_LIB )
+  # Cflags: -I${includedir} @TZ_COMPILE_DEFINITIONS@
+  set( TZ_COMPILE_DEFINITIONS "$<IF:$<TARGET_EXISTS:date-tz>,-D$<JOIN:$<TARGET_PROPERTY:date-tz,INTERFACE_COMPILE_DEFINITIONS>, -D>,>" )
+  configure_file(date.pc.in date.pc.cf @ONLY)
+  file( GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/date.pc"
+    INPUT "${CMAKE_CURRENT_BINARY_DIR}/date.pc.cf" )
+
+endif( )
 
 #[===================================================================[
    installation
@@ -186,6 +194,12 @@ if( BUILD_TZ_LIB )
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} )  # This is for Windows
     export( TARGETS date-tz NAMESPACE date:: APPEND FILE dateTargets.cmake )
+endif( )
+
+if ( BUILD_TZ_LIB )
+  install(
+    FILES ${CMAKE_BINARY_DIR}/date.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 endif( )
 
 if( WIN32 AND NOT CYGWIN)
